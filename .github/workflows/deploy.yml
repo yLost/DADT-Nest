@@ -21,7 +21,7 @@ jobs:
               git clone ${{ github.server_url }}/${{ github.repository }}.git ${{ secrets.DIR_TARGET }} -b ${{ github.ref_name }}
             #  git clone ${{ github.repositoryUrl }} -b ${{ github.ref_name }} ${{ secrets.DIR_TARGET }} --bare
         - name: repo_pull
-          if: job.steps.clone.status == failure() || job.steps.clone.outputs.conclusion == 'success'
+          if: job.steps.clone.status == failure() || steps.clone.outputs.conclusion == 'success'
           uses: appleboy/ssh-action@master
           with:
             host: ${{ secrets.SSH_HOST }}
@@ -32,7 +32,7 @@ jobs:
               cd ${{ secrets.DIR_TARGET }}
               git pull origin ${{ github.ref_name }}
         - name: docker_compose
-          if: job.steps.repo_pull.outputs.conclusion == 'success'
+          if: steps.repo_pull.outputs.conclusion == 'success'
           uses: appleboy/ssh-action@master
           with:
             host: ${{ secrets.SSH_HOST }}

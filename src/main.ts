@@ -17,7 +17,9 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TimeoutInterceptor());
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(process.env.PORT || 3000, () => {
+    this.Logger.log(`Microservice is listening on port ${process.env.PORT}`);
+  });
 
   // // Microservice listener
   // const microservice = await NestFactory.createMicroservice(

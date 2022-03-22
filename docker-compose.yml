@@ -1,0 +1,39 @@
+version: '3.8'
+
+networks:
+  kong-net2:
+    name: kong-net2
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 175.1.1.0/24
+
+services:
+  auth-db-2:
+    image: 'postgres:14'
+    container_name: auth-db-2
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: auth-db
+    ports:
+      - '5433:5432'
+    networks:
+      - kong-net2
+        
+
+  auth-api:
+    container_name: auth-api
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3001:3000'
+    depends_on:
+      - auth-db-2
+    env_file:
+      - .env
+    networks:
+      - kong-net2

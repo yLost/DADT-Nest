@@ -32,7 +32,7 @@ jobs:
               cd ${{ secrets.DIR_TARGET }}
               git pull origin ${{ github.ref_name }}
         - name: docker_compose
-          if: steps.repo_pull.outputs.conclusion == 'success'
+#           if: steps.repo_pull.outputs.conclusion == 'success'
           uses: appleboy/ssh-action@master
           with:
             host: ${{ secrets.SSH_HOST }}

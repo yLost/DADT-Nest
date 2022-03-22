@@ -9,24 +9,36 @@ jobs:
         name: SSH CONNECT
         runs-on: ubuntu-latest
         steps:
-        - uses: appleboy/ssh-action@master
-        - with:
+        - name: clone
+          continue-on-error: true
+          uses: appleboy/ssh-action@master
+          with:
             host: ${{ secrets.SSH_HOST }}
             username: ${{ secrets.SSH_USER }}
             password: ${{ secrets.SSH_PASSWORD }}
             port: ${{ secrets.SSH_PORT }}
-        - name: clone
-          continue-on-error: true
-          run: |
-            git clone ${{ github.server_url }}/${{ github.repository }}.git ${{ secrets.DIR_TARGET }} -b ${{ github.ref_name }}
-          #  git clone ${{ github.repositoryUrl }} -b ${{ github.ref_name }} ${{ secrets.DIR_TARGET }} --bare
+            script: |
+              git clone ${{ github.server_url }}/${{ github.repository }}.git ${{ secrets.DIR_TARGET }} -b ${{ github.ref_name }}
+            #  git clone ${{ github.repositoryUrl }} -b ${{ github.ref_name }} ${{ secrets.DIR_TARGET }} --bare
         - name: repo_pull
           if: job.steps.clone.status == failure() || steps.clone.outputs.conclusion == 'success'
-          run: |
-            cd ${{ secrets.DIR_TARGET }}
-            git pull origin ${{ github.ref_name }}
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.SSH_HOST }}
+            username: ${{ secrets.SSH_USER }}
+            password: ${{ secrets.SSH_PASSWORD }}
+            port: ${{ secrets.SSH_PORT }}
+            script: |
+              cd ${{ secrets.DIR_TARGET }}
+              git pull origin ${{ github.ref_name }}
         - name: docker_compose
-#           if: steps.repo_pull.outputs.conclusion == 'success'
-          run: |
-            cd ${{ secrets.DIR_TARGET }}
-            docker-compose -f "docker-compose.yaml" up -d --build
+          if: steps.repo_pull.outputs.conclusion == 'success'
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.SSH_HOST }}
+            username: ${{ secrets.SSH_USER }}
+            password: ${{ secrets.SSH_PASSWORD }}
+            port: ${{ secrets.SSH_PORT }}
+            script: |
+              cd ${{ secrets.DIR_TARGET }}
+              docker-compose -f "docker-compose.yaml" up -d --build

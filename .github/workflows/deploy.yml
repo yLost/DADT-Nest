@@ -17,10 +17,9 @@ jobs:
             port: ${{ secrets.SSH_PORT }}
         - name: clone
           continue-on-error: true
-          with:
-            script: |
-              git clone ${{ github.server_url }}/${{ github.repository }}.git ${{ secrets.DIR_TARGET }} -b ${{ github.ref_name }}
-            #  git clone ${{ github.repositoryUrl }} -b ${{ github.ref_name }} ${{ secrets.DIR_TARGET }} --bare
+          run: |
+            git clone ${{ github.server_url }}/${{ github.repository }}.git ${{ secrets.DIR_TARGET }} -b ${{ github.ref_name }}
+          #  git clone ${{ github.repositoryUrl }} -b ${{ github.ref_name }} ${{ secrets.DIR_TARGET }} --bare
         - name: repo_pull
           if: job.steps.clone.status == failure() || steps.clone.outputs.conclusion == 'success'
           with:

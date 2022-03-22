@@ -1,36 +1,25 @@
-FROM node:14.18.2 AS development
+FROM node:14 AS builder
 
-ARG NODE_ENV=development
-ENV NODE_ENV=${NODE_ENV}
+# Create app directory
+WORKDIR /app
 
-WORKDIR /usr/src/app
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+COPY package*.json ./
+COPY prisma ./prisma/
 
-COPY package.json yarn.lock ./
-
-RUN yarn install
-
-COPY prisma ./
-
-RUN npx prisma generate
+# Install app dependencies
+RUN npm install
 
 COPY . .
 
-RUN yarn build
+RUN npm run build
 
-FROM node:14.18.2 AS production
+FROM node:14
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
+COPY prisma ./prisma/
 
-WORKDIR /usr/src/app
-
-COPY package.json yarn.lock ./
-
-RUN yarn install --frozen-lockfile --production
-
-COPY --from=development /usr/src/app/node_modules ./node_modules
-COPY --from=development /usr/src/app/package*.json ./
-COPY --from=development /usr/src/app/dist ./dist
-COPY prisma ./
-
-CMD ["node", "dist/main"]
+EXPOSE 3000
+CMD [ "npm", "run", "start:migrate:prod" ]

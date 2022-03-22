@@ -18,7 +18,9 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
 
   await app.listen(process.env.PORT || 3000, () => {
-    logger.log(`Microservice is listening on port ${process.env.PORT}`);
+    logger.log(
+      `Microservice is listening on port ${process.env.PORT} env ${process.env.NODE_ENV}`,
+    );
   });
 
   // // Microservice listener
